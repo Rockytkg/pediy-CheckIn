@@ -7,41 +7,39 @@ on:
       - 'README.md'
       - 'imgs/**'
   schedule:
-    - cron: '30 22 * * *'  # 添加引号符合最新规范
+    - cron: '30 22 * * *'  # 签到时间
+    - cron: '0 */6 * * *'   # 保持活跃(每6小时)
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: write  # 为删除工作流运行添加必要权限
+      actions: write
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # 升级到最新稳定版
+        uses: actions/checkout@v4
         
       - name: Setup Node.js
-        uses: actions/setup-node@v4  # 升级到最新版
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'  # 更新到当前LTS版本
-          cache: 'npm'  # 添加npm缓存提高性能
+          node-version: '20'
+          cache: 'npm'
           
       - name: Install dependencies
-        run: npm ci  # 使用ci而不是install，确保依赖一致性
+        run: npm ci
         
       - name: Run CheckIn
+        if: github.event_name == 'schedule' && github.event.schedule == '30 22 * * *'
         run: node main.js
         env:
           PUSHPLUS: ${{ secrets.PUSHPLUS }}
           COOKIE: ${{ secrets.COOKIE }}
           
-      - name: Keep workflow alive
-        if: always()  # 确保即使主步骤失败也执行
-        uses: gautamkrishnar/keepalive-workflow@v1  # 使用固定版本而非master
-        
       - name: Clean up workflow runs
-        if: always()  # 确保清理步骤总是执行
-        uses: actions/delete-workflow-runs@v1  # GitHub官方维护的替代方案
+        if: always()
+        uses: actions/delete-workflow-runs@v1
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
