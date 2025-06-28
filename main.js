@@ -31,7 +31,7 @@ const checkIn = async () => {
     };
     return axios(options).catch(error => {
         if (error.response) {
-            // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
+            // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
